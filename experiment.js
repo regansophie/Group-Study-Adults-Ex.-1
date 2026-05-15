@@ -3,6 +3,7 @@ const MANIFEST_PATHS = [
   "../jspsych_stimuli/manifest.json",
 ];
 const DATAPIPE_EXPERIMENT_ID = "7NbjHHkuurpH";
+const PROLIFIC_COMPLETION_CODE = "ADD_CODE_HERE";
 const EXPOSURE_CHOICES = ["Next"];
 const CONSENT_IMAGES = [
   "consent form/consentFormPt1.jpg",
@@ -66,25 +67,17 @@ function makeConsentStimulus(imagePath, prompt = "") {
   `;
 }
 
-function makeDownloadScreen(jsPsych, filename, savedToDataPipe) {
+function makeCompletionScreen(savedToDataPipe) {
   return {
     type: jsPsychHtmlButtonResponse,
-    stimulus: () => {
-      const csv = jsPsych.data.get().csv();
-      const blob = new Blob([csv], { type: "text/csv" });
-      const url = URL.createObjectURL(blob);
-      const saveMessage = savedToDataPipe
-        ? "<p>Your responses have been saved.</p>"
-        : "<p>Your responses have been recorded in this browser.</p>";
-
-      return `
-        <div class="stage">
-          <h1>Thank you.</h1>
-          ${saveMessage}
-          <a class="download-link" href="${url}" download="${filename}">Download data CSV</a>
-        </div>
-      `;
-    },
+    stimulus: `
+      <div class="stage">
+        <h1>Thank you.</h1>
+        ${savedToDataPipe ? "<p>Your responses have been saved.</p>" : "<p>Your responses have been recorded.</p>"}
+        <p>Your Prolific completion code is:</p>
+        <h2>${PROLIFIC_COMPLETION_CODE}</h2>
+      </div>
+    `,
     choices: [],
     trial_duration: null,
   };
@@ -283,7 +276,7 @@ function buildTimeline(jsPsych, manifest, manifestPath, assignedVersion, partici
     });
   }
 
-  timeline.push(makeDownloadScreen(jsPsych, filename, shouldSaveToDataPipe));
+  timeline.push(makeCompletionScreen(shouldSaveToDataPipe));
 
   return timeline;
 }
