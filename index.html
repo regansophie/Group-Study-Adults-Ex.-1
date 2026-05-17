@@ -6,6 +6,7 @@
   <title>Experiment 1</title>
   <script src="jspsych/jspsych.js"></script>
   <script src="jspsych/plugin-preload.js"></script>
+  <script src="jspsych/plugin-survey-html-form.js"></script>
   <script src="jspsych/plugin-html-button-response.js"></script>
   <script src="jspsych/plugin-image-button-response.js"></script>
   <script src="https://unpkg.com/@jspsych-contrib/plugin-pipe@0.4"></script>
@@ -89,6 +90,24 @@
       color: #202124;
       text-decoration: none;
       font-size: 18px;
+    }
+
+    .id-entry {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      line-height: 1.4;
+    }
+
+    .id-entry input {
+      width: min(420px, 80vw);
+      min-height: 42px;
+      padding: 0 12px;
+      border: 1px solid #9c9c9c;
+      border-radius: 6px;
+      font-size: 18px;
+      text-align: center;
     }
 
     .error-message {
