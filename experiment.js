@@ -3,7 +3,7 @@ const MANIFEST_PATHS = [
   "../jspsych_stimuli/manifest.json",
 ];
 const DATAPIPE_EXPERIMENT_ID = "7NbjHHkuurpH";
-const PROLIFIC_COMPLETION_CODE = "ADD_CODE_HERE";
+const PROLIFIC_COMPLETION_CODE = "CNENXNHJ";
 const EXPOSURE_CHOICES = ["Next"];
 const CONSENT_IMAGES = [
   "consent form/consentFormPt1.jpg",
@@ -30,6 +30,47 @@ function makeParticipantId() {
   const prolificPid = getUrlParam("PROLIFIC_PID");
   const participant = getUrlParam("participant") || getUrlParam("participant_id") || getUrlParam("id");
   return prolificPid || participant || `anon_${Date.now()}_${randomInteger(1000, 9999)}`;
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function makeProlificIdTrial(jsPsych, initialParticipantId) {
+  const prefill = initialParticipantId.startsWith("anon_") ? "" : initialParticipantId;
+  return {
+    type: jsPsychSurveyHtmlForm,
+    preamble: `
+      <div class="id-entry">
+        <h1>Participant ID</h1>
+        <p>Please enter your Prolific ID before beginning the study.</p>
+      </div>
+    `,
+    html: `
+      <div class="id-entry">
+        <label for="prolific-id">Prolific ID</label>
+        <input id="prolific-id" name="prolific_id" type="text" value="${escapeHtml(prefill)}" required />
+      </div>
+    `,
+    autofocus: "prolific-id",
+    button_label: "Continue",
+    data: {
+      phase: "prolific_id_entry",
+    },
+    on_finish: (data) => {
+      const enteredId = String(data.response.prolific_id || "").trim();
+      data.entered_prolific_id = enteredId;
+      data.participant_id = enteredId;
+      jsPsych.data.addProperties({
+        participant_id: enteredId,
+        prolific_pid: enteredId,
+      });
+    },
+  };
 }
 
 function labelLevelForChoice(choice) {
@@ -135,6 +176,8 @@ function buildTimeline(jsPsych, manifest, manifestPath, assignedVersion, partici
     show_progress_bar: true,
     show_detailed_errors: true,
   });
+
+  timeline.push(makeProlificIdTrial(jsPsych, participantId));
 
   timeline.push({
     type: jsPsychHtmlButtonResponse,
